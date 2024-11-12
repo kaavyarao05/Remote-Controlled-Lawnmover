@@ -1,9 +1,11 @@
 #include<AFMotor.h>
+
 #define trigPin 3
 #define echoPin 2
 #define safeDistance 20 //centimeters
 
 #define FORCESTOP '7'
+
 #define STARTBUTTON '1'
 #define STOPBUTTON '0'
 #define LEFTBUTTON '5'
@@ -21,36 +23,52 @@ int buttonClicked=FORCESTOP,storedDir;
 float duration_us, distance_cm;
 
 void moveRight(){
+  Serial.println("Right");
   right.run(FORWARD);
   left.run(RELEASE);
+  delay(1000);
 }
 
 void moveLeft(){
+  Serial.println("Left");
   right.run(RELEASE);
   left.run(FORWARD);
+  delay(1000);
 }
 
 void moveFront(){
+  Serial.println("Front");
   right.run(FORWARD);
+  delay(500);
   left.run(FORWARD);
+  delay(1000);
 }
 
 void moveBack(){
+  Serial.println("Back");
   right.run(BACKWARD);
+  delay(500);
   left.run(BACKWARD);
+  delay(500);
 }
 
 void stopRun(){
+  Serial.println("STOP run");
   right.run(RELEASE);
   left.run(RELEASE);
+  delay(1000);
 }
 
 void startBlade(){
+  Serial.println("START blade");
   blade.run(FORWARD);
+  delay(1000);
 }
 
 void stopBlade(){
+  Serial.println("START blade");
   blade.run(RELEASE);
+  delay(1000);
 }
 
 void setup()  {
@@ -69,6 +87,7 @@ void loop() {
   digitalWrite(trigPin, LOW);
   duration_us = pulseIn(echoPin, HIGH);
   distance_cm = 0.017 * duration_us;
+  /*
   if(distance_cm<safeDistance){
     if (buttonClicked!=FORCESTOP)
       storedDir=buttonClicked;
@@ -81,47 +100,35 @@ void loop() {
       storedDir=NULL;
     spinning=true;
   }
-  delay(400);
-
+  */
+  Serial.println("running");
   if(Serial.available()>0){
     int input;
     input = Serial.read();
     delay(100);
     if(input==STARTBUTTON){
-      forceStop=false;
-      spinning=true;
+      startBlade();
     }
     else if (input==STOPBUTTON){
-      forceStop=true;
-      spinning=false;
-      if (buttonClicked!=FORCESTOP)
-        storedDir=buttonClicked;
-        buttonClicked=FORCESTOP;
+      stopBlade();
     }
     else{
       buttonClicked=input;
+      if(buttonClicked==LEFTBUTTON){
+        moveLeft();
+      }
+      else if (buttonClicked==RIGHTBUTTON){
+        moveRight();
+      }
+      else if(buttonClicked==UPBUTTON){
+        moveFront();
+      }
+      else if (buttonClicked==DOWNBUTTON){
+        moveBack();
+      }
+      else if (buttonClicked==FORCESTOP){
+        stopRun();
+      }
     }
-  }
-
-  if(spinning){
-    startBlade();
-  }
-  else{
-    stopBlade();
-  }
-  if(buttonClicked==LEFTBUTTON){
-    moveLeft();
-  }
-  else if (buttonClicked==RIGHTBUTTON){
-    moveRight();
-  }
-  else if(buttonClicked==UPBUTTON){
-    moveFront();
-  }
-  else if (buttonClicked==DOWNBUTTON){
-    moveBack();
-  }
-  else if (buttonClicked=FORCESTOP){
-    stopRun();
   }
 }
